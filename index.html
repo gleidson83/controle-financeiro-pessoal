@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Controle Financeiro Pessoal</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
   <link rel="stylesheet" href="style.css">
   <!-- Chart.js via CDN: biblioteca dos gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -12,20 +13,20 @@
   <!-- Cabeçalho com título e seletor de mês (vale para todas as abas) -->
   <header class="topo">
     <h1>💰 Minhas Finanças</h1>
-    <label class="mes-seletor">
-      Mês
-      <input type="month" id="mesAtual">
-    </label>
+    <label class="mes-seletor">Mês <input type="month" id="mesAtual"></label>
   </header>
 
   <!-- Menu de abas -->
   <nav class="abas">
     <button class="aba ativa" data-aba="painel">Painel</button>
     <button class="aba" data-aba="lancamentos">Lançamentos</button>
+    <button class="aba" data-aba="contas">Contas</button>
     <button class="aba" data-aba="orcamento">Orçamento</button>
     <button class="aba" data-aba="projecoes">Projeções</button>
+    <button class="aba" data-aba="investimentos">Investimentos</button>
     <button class="aba" data-aba="categorias">Categorias</button>
     <button class="aba" data-aba="dados">Dados</button>
+    <button class="aba" data-aba="config">Config</button>
   </nav>
 
   <main>
@@ -35,6 +36,7 @@
         <div class="card receita"><span>Receitas</span><strong id="totReceitas">R$ 0,00</strong></div>
         <div class="card despesa"><span>Despesas</span><strong id="totDespesas">R$ 0,00</strong></div>
         <div class="card saldo"><span>Saldo do mês</span><strong id="totSaldo">R$ 0,00</strong></div>
+        <div class="card contas"><span>Total em contas</span><strong id="totContas">R$ 0,00</strong></div>
       </div>
       <div class="grade-graficos">
         <div class="caixa">
@@ -62,12 +64,10 @@
           <input type="hidden" id="lancId">
           <label>Data <input type="date" id="lancData" required></label>
           <label>Tipo
-            <select id="lancTipo">
-              <option value="despesa">Despesa</option>
-              <option value="receita">Receita</option>
-            </select>
+            <select id="lancTipo"><option value="despesa">Despesa</option><option value="receita">Receita</option></select>
           </label>
           <label>Categoria <select id="lancCategoria" required></select></label>
+          <label>Conta <select id="lancConta" required></select></label>
           <label>Valor (R$) <input type="number" id="lancValor" step="0.01" min="0.01" inputmode="decimal" required></label>
           <label class="larga">Descrição <input type="text" id="lancDescricao" maxlength="80" required></label>
           <label class="check"><input type="checkbox" id="lancRecorrente"> Recorrente (repete todo mês)</label>
@@ -81,11 +81,62 @@
         <h2>Lançamentos do mês</h2>
         <div class="tabela-rolagem">
           <table class="tabela">
-            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th class="num">Valor</th><th></th></tr></thead>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Conta</th><th class="num">Valor</th><th></th></tr></thead>
             <tbody id="tabelaLanc"></tbody>
           </table>
         </div>
         <p id="semLanc" class="vazio">Nenhum lançamento neste mês.</p>
+      </div>
+    </section>
+
+    <!-- ===== CONTAS ===== -->
+    <section id="contas" class="secao">
+      <div class="caixa">
+        <h2>Saldo por conta <small class="dica">(até o fim do mês selecionado)</small></h2>
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead><tr><th>Conta</th><th>Tipo</th><th class="num">Saldo inicial</th><th class="num">Saldo atual</th><th></th></tr></thead>
+            <tbody id="tabelaContas"></tbody>
+            <tfoot><tr><th colspan="3">Total</th><th class="num" id="totalContas">R$ 0,00</th><th></th></tr></tfoot>
+          </table>
+        </div>
+      </div>
+      <div class="caixa">
+        <h2>Nova conta</h2>
+        <form id="formConta" class="form-grade">
+          <label>Nome <input type="text" id="contaNome" maxlength="40" required></label>
+          <label>Tipo
+            <select id="contaTipo">
+              <option value="corrente">Conta corrente</option>
+              <option value="poupanca">Poupança</option>
+              <option value="carteira">Carteira</option>
+              <option value="cartao">Cartão de crédito</option>
+              <option value="investimento">Investimento</option>
+            </select>
+          </label>
+          <label>Saldo inicial (R$) <input type="number" id="contaSaldo" step="0.01" value="0" inputmode="decimal"></label>
+          <div class="botoes"><button type="submit" class="btn primario">Adicionar</button></div>
+        </form>
+        <p class="dica">Cartão de crédito: compras lançadas nele deixam o saldo negativo (é a fatura). Pagar a fatura = transferir da conta corrente para o cartão.</p>
+      </div>
+      <div class="caixa">
+        <h2>Transferência entre contas</h2>
+        <form id="formTransf" class="form-grade">
+          <label>Data <input type="date" id="trData" required></label>
+          <label>De <select id="trOrigem" required></select></label>
+          <label>Para <select id="trDestino" required></select></label>
+          <label>Valor (R$) <input type="number" id="trValor" step="0.01" min="0.01" inputmode="decimal" required></label>
+          <label class="larga">Descrição <input type="text" id="trDescricao" maxlength="60" placeholder="Ex.: pagamento da fatura"></label>
+          <div class="botoes"><button type="submit" class="btn primario">Transferir</button></div>
+        </form>
+        <p class="dica">Transferência só move dinheiro entre suas contas: não conta como receita nem despesa.</p>
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead><tr><th>Data</th><th>De</th><th>Para</th><th>Descrição</th><th class="num">Valor</th><th></th></tr></thead>
+            <tbody id="tabelaTransf"></tbody>
+          </table>
+        </div>
+        <p id="semTransf" class="vazio">Nenhuma transferência neste mês.</p>
       </div>
     </section>
 
@@ -116,19 +167,55 @@
             </select>
           </label>
           <label>Meses à frente
-            <select id="projMeses">
-              <option>3</option><option selected>6</option><option>12</option>
-            </select>
+            <select id="projMeses"><option>3</option><option selected>6</option><option>12</option></select>
           </label>
         </div>
         <p class="dica" id="projExplicacao"></p>
         <canvas id="graficoProjecao"></canvas>
         <div class="tabela-rolagem">
           <table class="tabela">
-            <thead><tr><th>Mês</th><th class="num">Receitas</th><th class="num">Despesas</th><th class="num">Saldo do mês</th><th class="num">Saldo acumulado</th></tr></thead>
+            <thead><tr><th>Mês</th><th class="num">Receitas</th><th class="num">Despesas</th><th class="num">Saldo do mês</th><th class="num">Saldo em contas</th></tr></thead>
             <tbody id="tabelaProj"></tbody>
           </table>
         </div>
+      </div>
+    </section>
+
+    <!-- ===== INVESTIMENTOS (simulador) ===== -->
+    <section id="investimentos" class="secao">
+      <div class="caixa alerta-box">
+        <strong>⚠️ Simulação educativa — não é recomendação de investimento.</strong>
+        As taxas são <strong>exemplos editáveis</strong>, não taxas atuais de mercado.
+        As regras de IR foram simplificadas e podem mudar. Confira taxas, impostos e custos reais antes de decidir.
+      </div>
+      <div class="caixa">
+        <h2>Dados da simulação</h2>
+        <div class="form-grade">
+          <label>Valor inicial (R$) <input type="number" id="invInicial" value="1000" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Aporte mensal (R$) <input type="number" id="invAporte" value="200" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Prazo <input type="number" id="invPrazo" value="2" min="1" max="600" step="1" inputmode="numeric"></label>
+          <label>Unidade
+            <select id="invUnidade"><option value="anos">anos</option><option value="meses">meses</option></select>
+          </label>
+        </div>
+      </div>
+      <!-- Os 3 cartões de cenário são desenhados pelo app.js -->
+      <div class="grade-cenarios" id="cenarios"></div>
+      <div class="caixa">
+        <h2>Evolução do valor líquido (após IR)</h2>
+        <canvas id="graficoInvest"></canvas>
+      </div>
+      <div class="caixa">
+        <h2>Comparativo no fim do prazo</h2>
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead><tr><th>Cenário</th><th class="num">Taxa a.a.</th><th class="num">Total investido</th><th class="num">Juros (bruto)</th><th class="num">IR</th><th class="num">Valor líquido</th></tr></thead>
+            <tbody id="tabelaInvest"></tbody>
+          </table>
+        </div>
+        <p class="dica">Como o IR foi calculado nesta simulação: renda fixa (CDB, Tesouro) usa a tabela regressiva — 22,5% até 6 meses, 20% até 12, 17,5% até 24 e 15% acima — sobre o ganho de cada aporte, conforme o tempo aplicado.
+          Poupança e LCI/LCA: isentos para pessoa física. Fundos/ações: 15% sobre o ganho (simplificação; não considera come-cotas, isenções, taxas ou custos).
+          Aportes no fim de cada mês.</p>
       </div>
     </section>
 
@@ -139,10 +226,7 @@
         <form id="formCat" class="form-grade">
           <label>Nome <input type="text" id="catNome" maxlength="40" required></label>
           <label>Tipo
-            <select id="catTipo">
-              <option value="despesa">Despesa</option>
-              <option value="receita">Receita</option>
-            </select>
+            <select id="catTipo"><option value="despesa">Despesa</option><option value="receita">Receita</option></select>
           </label>
           <div class="botoes"><button type="submit" class="btn primario">Adicionar</button></div>
         </form>
@@ -157,7 +241,7 @@
     <section id="dados" class="secao">
       <div class="caixa">
         <h2>Backup dos dados</h2>
-        <p class="dica">Os dados ficam salvos só neste navegador (localStorage). Exporte para não perder.</p>
+        <p class="dica">Os dados ficam salvos só neste navegador (localStorage). Exporte para não perder. A chave da API (aba Config) <strong>não</strong> entra no backup.</p>
         <div class="botoes">
           <button id="btnExportar" class="btn primario">Exportar JSON</button>
           <label class="btn">Importar JSON <input type="file" id="inputImportar" accept=".json,application/json" hidden></label>
@@ -166,11 +250,67 @@
         </div>
       </div>
     </section>
+
+    <!-- ===== CONFIG (IA opcional) ===== -->
+    <section id="config" class="secao">
+      <div class="caixa">
+        <h2>Assistente com IA real (opcional)</h2>
+        <div class="alerta-box">
+          <strong>⚠️ Leia antes de usar:</strong>
+          <ul>
+            <li>A chave fica salva <strong>só neste navegador</strong> (localStorage), sem criptografia. Quem usar este navegador pode vê-la. Não use em computador compartilhado.</li>
+            <li>No modo IA, um <strong>resumo</strong> dos seus dados (totais do mês, categorias, orçamento e saldos das contas — sem as descrições dos lançamentos) é enviado para a API da Anthropic a cada pergunta.</li>
+            <li>O uso da API é cobrado na sua conta Anthropic. Prefira uma chave com validade curta e limite de gastos, e apague quando não precisar.</li>
+          </ul>
+        </div>
+        <form id="formIA" class="form-grade">
+          <label class="larga">Chave da API Anthropic <input type="password" id="iaChave" autocomplete="off" spellcheck="false" placeholder="cole sua chave aqui"></label>
+          <label>Modelo
+            <select id="iaModelo">
+              <option value="claude-haiku-5-5">Claude Haiku 5.5 (mais rápido e barato)</option>
+              <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
+            </select>
+          </label>
+          <label>ID do workspace (opcional) <input type="text" id="iaWorkspace" autocomplete="off" spellcheck="false" placeholder="wrkspc_..."></label>
+          <label class="check"><input type="checkbox" id="iaAtivo"> Usar IA real no assistente</label>
+          <div class="botoes">
+            <button type="submit" class="btn primario">Salvar</button>
+            <button type="button" id="btnApagarChave" class="btn perigo">Apagar chave</button>
+          </div>
+        </form>
+        <p class="dica">O ID do workspace só é necessário se a sua chave não estiver vinculada a um workspace (a API avisa com erro 400). Sem chave, o assistente funciona no modo local.</p>
+        <p class="dica" id="iaStatus"></p>
+      </div>
+    </section>
   </main>
+
+  <!-- ===== ASSISTENTE (botão flutuante + janela de chat) ===== -->
+  <button id="chatBotao" class="chat-botao" aria-label="Abrir assistente" title="Assistente">💬</button>
+  <div id="chatPainel" class="chat-painel" hidden>
+    <div class="chat-topo">
+      <strong>Assistente</strong>
+      <span id="chatModo" class="selo">Modo local</span>
+      <button id="chatFechar" class="btn-mini" aria-label="Fechar">✖</button>
+    </div>
+    <div id="chatMensagens" class="chat-mensagens" aria-live="polite"></div>
+    <div class="chat-sugestoes">
+      <button class="sugestao" data-pergunta="Qual meu saldo?">Saldo</button>
+      <button class="sugestao" data-pergunta="Estou dentro do orçamento?">Orçamento</button>
+      <button class="sugestao" data-pergunta="Onde mais gastei este mês?">Maior gasto</button>
+      <button class="sugestao" data-pergunta="Como faço uma transferência?">Ajuda</button>
+    </div>
+    <form id="chatForm" class="chat-form">
+      <input type="text" id="chatTexto" placeholder="Pergunte algo..." autocomplete="off" maxlength="500">
+      <button type="submit" class="btn primario">Enviar</button>
+    </form>
+  </div>
 
   <!-- Aviso rápido (toast) -->
   <div id="aviso" class="aviso"></div>
 
+  <!-- Ordem importa: cálculos -> tela -> assistente -->
+  <script src="calc.js"></script>
   <script src="app.js"></script>
+  <script src="assistente.js"></script>
 </body>
 </html>

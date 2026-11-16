@@ -72,7 +72,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 16px; }
 }
 .caixa h2 { font-size: 1.05rem; margin: 0 0 12px; }
 
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .card {
   background: var(--caixa);
   border: 1px solid var(--borda);
@@ -84,6 +84,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 16px; }
 .card strong { font-size: 1.4rem; }
 .card.receita { border-left-color: var(--verde); }
 .card.despesa { border-left-color: var(--vermelho); }
+.card.contas { border-left-color: var(--primaria); }
 
 .grade-graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 canvas { max-height: 300px; }
@@ -164,7 +165,64 @@ input:focus, select:focus { outline: 2px solid var(--primaria); outline-offset: 
 
 /* ===== Celular: tudo em uma coluna ===== */
 @media (max-width: 700px) {
-  .cards, .grade-graficos { grid-template-columns: 1fr; }
+  .grade-graficos { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: 1fr 1fr; }
   .card strong { font-size: 1.2rem; }
   main { padding: 10px; }
 }
+
+/* ===== Caixa de alerta (avisos importantes) ===== */
+.alerta-box {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--raio);
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.alerta-box ul { margin: 6px 0 0; padding-left: 20px; }
+.caixa.alerta-box { margin-bottom: 16px; }
+.form-grade + .dica, .alerta-box + .form-grade { margin-top: 12px; }
+
+/* ===== Investimentos: cartões de cenário ===== */
+.grade-cenarios { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.cenario { border-top: 4px solid var(--cor, var(--primaria)); }
+.cenario.inativo { opacity: 0.55; }
+.cenario label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--suave); margin-bottom: 8px; }
+.cenario .linha-ativo { flex-direction: row; align-items: center; gap: 8px; color: var(--texto); font-weight: 600; }
+.exemplo { font-size: 0.7rem; background: #eef2ff; color: var(--primaria); padding: 1px 6px; border-radius: 6px; margin-left: 4px; }
+
+/* ===== Assistente (chat) ===== */
+.chat-botao {
+  position: fixed; right: 20px; bottom: 20px; width: 56px; height: 56px;
+  border-radius: 50%; border: none; background: var(--primaria); color: #fff;
+  font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2); z-index: 20;
+}
+.chat-painel {
+  position: fixed; right: 20px; bottom: 88px; width: 360px; max-height: 70vh;
+  display: flex; flex-direction: column; background: var(--caixa);
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18); z-index: 20;
+}
+.chat-painel[hidden] { display: none; }
+.chat-topo { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--borda); }
+.chat-topo .btn-mini { margin-left: auto; }
+.selo { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: var(--fundo); color: var(--suave); }
+.selo.ia { background: #eef2ff; color: var(--primaria); }
+.chat-mensagens { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 160px; }
+.msg { padding: 8px 12px; border-radius: 12px; max-width: 85%; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.4; }
+.msg.usuario { align-self: flex-end; background: var(--primaria); color: #fff; }
+.msg.bot { align-self: flex-start; background: var(--fundo); }
+.msg.erro { background: #fef2f2; color: var(--vermelho); }
+.chat-sugestoes { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 12px 8px; }
+.sugestao { border: 1px solid var(--borda); background: #fff; border-radius: 14px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; }
+.chat-form { display: flex; gap: 6px; padding: 10px 12px; border-top: 1px solid var(--borda); }
+.chat-form input { flex: 1; min-width: 0; }
+.chat-form .btn { margin-top: 0; }
+main { padding-bottom: 90px; } /* espaço para o botão do chat não cobrir o conteúdo */
+
+/* Celular: chat ocupa a largura da tela (fica no fim para valer sobre as regras acima) */
+@media (max-width: 700px) {
+  .chat-painel { right: 8px; left: 8px; width: auto; bottom: 84px; max-height: 65vh; }
+}
+.aviso { bottom: 90px; z-index: 30; } /* acima do botão do chat */
