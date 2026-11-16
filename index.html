@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle Financeiro Pessoal</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js via CDN: biblioteca dos gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Cabeçalho com título e seletor de mês (vale para todas as abas) -->
+  <header class="topo">
+    <h1>💰 Minhas Finanças</h1>
+    <label class="mes-seletor">
+      Mês
+      <input type="month" id="mesAtual">
+    </label>
+  </header>
+
+  <!-- Menu de abas -->
+  <nav class="abas">
+    <button class="aba ativa" data-aba="painel">Painel</button>
+    <button class="aba" data-aba="lancamentos">Lançamentos</button>
+    <button class="aba" data-aba="orcamento">Orçamento</button>
+    <button class="aba" data-aba="projecoes">Projeções</button>
+    <button class="aba" data-aba="categorias">Categorias</button>
+    <button class="aba" data-aba="dados">Dados</button>
+  </nav>
+
+  <main>
+    <!-- ===== PAINEL / RELATÓRIOS ===== -->
+    <section id="painel" class="secao ativa">
+      <div class="cards">
+        <div class="card receita"><span>Receitas</span><strong id="totReceitas">R$ 0,00</strong></div>
+        <div class="card despesa"><span>Despesas</span><strong id="totDespesas">R$ 0,00</strong></div>
+        <div class="card saldo"><span>Saldo do mês</span><strong id="totSaldo">R$ 0,00</strong></div>
+      </div>
+      <div class="grade-graficos">
+        <div class="caixa">
+          <h2>Gastos por categoria</h2>
+          <canvas id="graficoCategorias"></canvas>
+          <p id="semGastos" class="vazio">Nenhuma despesa neste mês.</p>
+        </div>
+        <div class="caixa">
+          <h2>Evolução mensal (últimos 6 meses)</h2>
+          <canvas id="graficoEvolucao"></canvas>
+        </div>
+      </div>
+      <div class="caixa">
+        <h2>Despesas por categoria</h2>
+        <table class="tabela"><thead><tr><th>Categoria</th><th class="num">Valor</th><th class="num">% do total</th></tr></thead>
+          <tbody id="tabelaCategoriasMes"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ===== LANÇAMENTOS ===== -->
+    <section id="lancamentos" class="secao">
+      <div class="caixa">
+        <h2 id="tituloFormLanc">Novo lançamento</h2>
+        <form id="formLanc" class="form-grade">
+          <input type="hidden" id="lancId">
+          <label>Data <input type="date" id="lancData" required></label>
+          <label>Tipo
+            <select id="lancTipo">
+              <option value="despesa">Despesa</option>
+              <option value="receita">Receita</option>
+            </select>
+          </label>
+          <label>Categoria <select id="lancCategoria" required></select></label>
+          <label>Valor (R$) <input type="number" id="lancValor" step="0.01" min="0.01" inputmode="decimal" required></label>
+          <label class="larga">Descrição <input type="text" id="lancDescricao" maxlength="80" required></label>
+          <label class="check"><input type="checkbox" id="lancRecorrente"> Recorrente (repete todo mês)</label>
+          <div class="botoes">
+            <button type="submit" class="btn primario">Salvar</button>
+            <button type="button" id="btnCancelarLanc" class="btn">Cancelar</button>
+          </div>
+        </form>
+      </div>
+      <div class="caixa">
+        <h2>Lançamentos do mês</h2>
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th class="num">Valor</th><th></th></tr></thead>
+            <tbody id="tabelaLanc"></tbody>
+          </table>
+        </div>
+        <p id="semLanc" class="vazio">Nenhum lançamento neste mês.</p>
+      </div>
+    </section>
+
+    <!-- ===== ORÇAMENTO ===== -->
+    <section id="orcamento" class="secao">
+      <div class="caixa">
+        <h2>Orçamento do mês: previsto x realizado</h2>
+        <p class="dica">Digite o valor previsto de cada categoria. O realizado vem dos lançamentos do mês.</p>
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead><tr><th>Categoria</th><th class="num">Previsto</th><th class="num">Realizado</th><th class="num">Diferença</th><th>% atingido</th></tr></thead>
+            <tbody id="tabelaOrc"></tbody>
+          </table>
+        </div>
+        <button id="btnCopiarOrc" class="btn">Copiar orçamento do mês anterior</button>
+      </div>
+    </section>
+
+    <!-- ===== PROJEÇÕES ===== -->
+    <section id="projecoes" class="secao">
+      <div class="caixa">
+        <h2>Saldo projetado</h2>
+        <div class="form-grade">
+          <label>Método
+            <select id="projMetodo">
+              <option value="media">Média dos últimos 3 meses</option>
+              <option value="recorrente">Lançamentos recorrentes</option>
+            </select>
+          </label>
+          <label>Meses à frente
+            <select id="projMeses">
+              <option>3</option><option selected>6</option><option>12</option>
+            </select>
+          </label>
+        </div>
+        <p class="dica" id="projExplicacao"></p>
+        <canvas id="graficoProjecao"></canvas>
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead><tr><th>Mês</th><th class="num">Receitas</th><th class="num">Despesas</th><th class="num">Saldo do mês</th><th class="num">Saldo acumulado</th></tr></thead>
+            <tbody id="tabelaProj"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CATEGORIAS ===== -->
+    <section id="categorias" class="secao">
+      <div class="caixa">
+        <h2>Nova categoria</h2>
+        <form id="formCat" class="form-grade">
+          <label>Nome <input type="text" id="catNome" maxlength="40" required></label>
+          <label>Tipo
+            <select id="catTipo">
+              <option value="despesa">Despesa</option>
+              <option value="receita">Receita</option>
+            </select>
+          </label>
+          <div class="botoes"><button type="submit" class="btn primario">Adicionar</button></div>
+        </form>
+      </div>
+      <div class="grade-graficos">
+        <div class="caixa"><h2>Receitas</h2><ul id="listaCatReceita" class="lista"></ul></div>
+        <div class="caixa"><h2>Despesas</h2><ul id="listaCatDespesa" class="lista"></ul></div>
+      </div>
+    </section>
+
+    <!-- ===== DADOS (backup) ===== -->
+    <section id="dados" class="secao">
+      <div class="caixa">
+        <h2>Backup dos dados</h2>
+        <p class="dica">Os dados ficam salvos só neste navegador (localStorage). Exporte para não perder.</p>
+        <div class="botoes">
+          <button id="btnExportar" class="btn primario">Exportar JSON</button>
+          <label class="btn">Importar JSON <input type="file" id="inputImportar" accept=".json,application/json" hidden></label>
+          <button id="btnExemplo" class="btn">Carregar dados de exemplo</button>
+          <button id="btnLimpar" class="btn perigo">Apagar tudo</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Aviso rápido (toast) -->
+  <div id="aviso" class="aviso"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

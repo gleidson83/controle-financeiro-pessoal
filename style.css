@@ -1,0 +1,170 @@
+/* ===== Variáveis de cor (mude aqui para trocar o tema) ===== */
+:root {
+  --fundo: #f5f7fa;
+  --caixa: #ffffff;
+  --texto: #1f2937;
+  --suave: #6b7280;
+  --borda: #e5e7eb;
+  --primaria: #4f46e5;
+  --verde: #16a34a;
+  --vermelho: #dc2626;
+  --azul: #2563eb;
+  --raio: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+}
+
+/* ===== Cabeçalho ===== */
+.topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--caixa);
+  border-bottom: 1px solid var(--borda);
+}
+.topo h1 { font-size: 1.3rem; margin: 0; }
+.mes-seletor { display: flex; align-items: center; gap: 8px; color: var(--suave); }
+
+/* ===== Abas ===== */
+.abas {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;            /* no celular, rola para o lado */
+  padding: 8px 12px;
+  background: var(--caixa);
+  border-bottom: 1px solid var(--borda);
+}
+.aba {
+  border: none;
+  background: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--suave);
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+.aba.ativa { background: var(--primaria); color: #fff; }
+
+main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+/* Só a seção ativa aparece */
+.secao { display: none; }
+.secao.ativa { display: block; }
+
+/* ===== Caixas e cards ===== */
+.caixa {
+  background: var(--caixa);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.caixa h2 { font-size: 1.05rem; margin: 0 0 12px; }
+
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.card {
+  background: var(--caixa);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 16px;
+  border-left: 5px solid var(--azul);
+}
+.card span { display: block; color: var(--suave); font-size: 0.9rem; }
+.card strong { font-size: 1.4rem; }
+.card.receita { border-left-color: var(--verde); }
+.card.despesa { border-left-color: var(--vermelho); }
+
+.grade-graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+canvas { max-height: 300px; }
+
+/* ===== Formulários ===== */
+.form-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+.form-grade label { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; color: var(--suave); }
+.form-grade .larga { grid-column: 1 / -1; }
+.form-grade .check { flex-direction: row; align-items: center; }
+
+input, select {
+  padding: 9px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--texto);
+}
+input:focus, select:focus { outline: 2px solid var(--primaria); outline-offset: 0; }
+
+.botoes { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  padding: 9px 14px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+.btn.primario { background: var(--primaria); color: #fff; border-color: var(--primaria); }
+.btn.perigo { color: var(--vermelho); border-color: var(--vermelho); }
+.btn-mini { border: none; background: none; cursor: pointer; font-size: 1rem; padding: 4px; }
+
+/* ===== Tabelas ===== */
+.tabela-rolagem { overflow-x: auto; }
+.tabela { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.tabela th, .tabela td { padding: 8px; border-bottom: 1px solid var(--borda); text-align: left; }
+.tabela th { color: var(--suave); font-weight: 600; }
+.tabela .num { text-align: right; white-space: nowrap; }
+.tabela input { width: 110px; text-align: right; }
+
+.positivo { color: var(--verde); }
+.negativo { color: var(--vermelho); }
+
+/* Barra de progresso do % atingido */
+.barra { background: var(--borda); border-radius: 6px; height: 8px; min-width: 80px; overflow: hidden; }
+.barra div { height: 100%; background: var(--verde); }
+.barra div.alerta { background: #f59e0b; }
+.barra div.estourou { background: var(--vermelho); }
+
+/* ===== Lista de categorias ===== */
+.lista { list-style: none; padding: 0; margin: 0; }
+.lista li { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--borda); }
+
+.dica, .vazio { color: var(--suave); font-size: 0.9rem; }
+
+/* ===== Aviso (toast) ===== */
+.aviso {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--texto);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.aviso.mostrar { opacity: 1; }
+
+/* ===== Celular: tudo em uma coluna ===== */
+@media (max-width: 700px) {
+  .cards, .grade-graficos { grid-template-columns: 1fr; }
+  .card strong { font-size: 1.2rem; }
+  main { padding: 10px; }
+}
